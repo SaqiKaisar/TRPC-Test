@@ -1,25 +1,39 @@
-import express from "express"
-import cors from "cors"
-import { createExpressMiddleware } from "@trpc/server/adapters/express"
-import { appRouter } from "./trpc/routers/_app"
-import { createContext } from "./trpc/context"
+import express from 'express';
+import cors from 'cors';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { appRouter } from './trpc/routers/_app';
+import { initDb, testConnection, pool } from './db/index'; // make sure to export pool
+import {initUserTable} from "./db/initUserTable"
 
+async function main() {
+  const app = express()
+  const PORT = 4000
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+  // Enable CORS for frontend
+  app.use(cors())
 
-app.use(
-    "/trpc",
+  // Initialize DB
+  await initDb()
+  await testConnection()
+  await initUserTable()
+
+  // tRPC middleware
+  app.use(
+    '/trpc',
     createExpressMiddleware({
-        router: appRouter,
-        createContext,
+      router: appRouter,
+      createContext: () => ({ db: pool, req: {} as any, res: {} as any }), // simplified
     })
-)
+  )
 
-const PORT = 4000
-app.listen(PORT,()=>{
-    console.log(`tRPC server running at https://localhost:${PORT}`)
-})
+  // Start server
+  app.listen(PORT, () => {
+    console.log(`tRPC server running at http://localhost:${PORT}`);
+  })
+}
 
-export type AppRouter = typeof appRouter
+// Call the async function and catch errors
+main().catch((err) => {
+  console.error('Error starting server:', err);
+  process.exit(1);
+});
