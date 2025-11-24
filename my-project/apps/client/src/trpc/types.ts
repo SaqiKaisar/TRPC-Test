@@ -1,3 +1,3 @@
-import type {AppRouter} from "../../../server/src/server.ts"
+import type {AppRouter} from "@packages/types/trpc"
 
 export type {AppRouter}
