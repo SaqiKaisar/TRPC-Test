@@ -3,7 +3,7 @@ import { createPool, sql } from 'slonik';
 export let pool: import('slonik').DatabasePool;
 
 export async function initDb() {
-    pool = await createPool('postgresql://postgres:secret@localhost:5432/mydb');
+    pool = await createPool('postgresql://postgres:secret@postgres:5432/mydb');
 }
 
 
